@@ -1,6 +1,10 @@
 package org.sceext.llsm
 
+
+import java.util.Arrays
+
 import android.app.Application
+import android.content.Intent
 import android.media.projection.MediaProjection
 
 import com.facebook.react.ReactApplication
@@ -8,8 +12,6 @@ import com.facebook.react.ReactNativeHost
 import com.facebook.react.ReactPackage
 import com.facebook.react.shell.MainReactPackage
 import com.facebook.soloader.SoLoader
-
-import java.util.Arrays
 
 
 // save MainApplication instance
@@ -23,6 +25,7 @@ class MainApplication : Application(), ReactApplication {
     var main_activity: MainActivity? = null
 
     lateinit var media_projection: MediaProjection
+    lateinit var sconfig: Sconfig
 
 
     private val mReactNativeHost = object: ReactNativeHost(this) {
@@ -54,7 +57,10 @@ class MainApplication : Application(), ReactApplication {
     }
 
     fun init_sm() {
-        // TODO
-        toast("DEBUG: init_sm TODO")
+        _start_service()
+    }
+
+    fun _start_service() {
+        startService(Intent(this, SmService::class.java))
     }
 }

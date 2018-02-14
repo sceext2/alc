@@ -1,5 +1,7 @@
 package org.sceext.llsm
 
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 
 import com.beust.klaxon.Parser
@@ -8,7 +10,13 @@ import com.beust.klaxon.JsonObject
 
 // show one toast on Android
 fun toast(text: String) {
-    Toast.makeText(get_app_context(), text, Toast.LENGTH_SHORT).show()
+    // always run on UI thread
+    val h = Handler(Looper.getMainLooper())
+    h.post(object: Runnable {
+        override fun run() {
+            Toast.makeText(get_app_context(), text, Toast.LENGTH_SHORT).show()
+        }
+    })
 }
 
 

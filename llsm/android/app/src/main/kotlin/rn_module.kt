@@ -46,13 +46,20 @@ class SmNative : ReactContextBaseJavaModule {
             e.printStackTrace()
 
             toast("ERROR: bad config_json: " + config_json)
+
+            promise.reject("bad config_json", Exception("bad config_json"))
             return
         }
+        // save config
+        get_app_context().sconfig = c
 
         // SM step 1: Ask user by MediaProjectionManager
         val m: MediaProjectionManager = get_app_context().getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
         val i = m.createScreenCaptureIntent()
         get_app_context().main_activity!!.startActivityForResult(i, MEDIA_PROJECTION_REQUEST_CODE)
+
+        // OK callback
+        promise.resolve(null)
     }
 
     @ReactMethod
