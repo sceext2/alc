@@ -1,10 +1,41 @@
 # index.coffee, alc/llsm/src/
 
-{ AppRegistry } = require 'react-native'
+{
+  createStore
+  applyMiddleware
+} = require 'redux'
+{ default: thunk } = require 'redux-thunk'
+
+{ Provider } = require 'react-redux'
+
+{ createElement: cE } = require 'react'
+cC = require 'create-react-class'
+PropTypes = require 'prop-types'
+
+
+reducer = require './redux/reducer'
 
 Main = require './main'
 
-AppRegistry.registerComponent 'llsm_main', () ->
-  Main
+# redux store
+store = createStore reducer, applyMiddleware(thunk)
 
-module.exports = Main
+O = cC {
+  render: ->
+    (cE Provider, {
+      store
+      },
+      (cE Main)
+    )
+}
+
+
+{ AppRegistry } = require 'react-native'
+
+AppRegistry.registerComponent 'llsm_main', () ->
+  O
+
+module.exports = {
+  store
+  O
+}

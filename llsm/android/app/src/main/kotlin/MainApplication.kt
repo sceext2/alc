@@ -20,7 +20,8 @@ class MainApplication : Application(), ReactApplication {
 
         override fun getPackages(): List<ReactPackage> {
             return Arrays.asList(
-                MainReactPackage()
+                MainReactPackage(),
+                SmPackage()
             )
         }
 
