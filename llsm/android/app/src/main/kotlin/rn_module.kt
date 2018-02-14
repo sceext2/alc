@@ -34,6 +34,8 @@ class SmNative : ReactContextBaseJavaModule {
 
     @ReactMethod
     fun start_sm(config_json: String, promise: Promise) {
+        // only for DEBUG
+        toast("DEBUG: start_sm: got config_json: " + config_json)
         // TODO
     }
 

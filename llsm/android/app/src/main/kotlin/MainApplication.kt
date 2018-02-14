@@ -11,6 +11,12 @@ import com.facebook.soloader.SoLoader
 import java.util.Arrays
 
 
+// save MainApplication instance
+var app_context: MainApplication? = null
+
+fun get_app_context(): MainApplication = app_context!!
+
+
 class MainApplication : Application(), ReactApplication {
 
     private val mReactNativeHost = object: ReactNativeHost(this) {
@@ -37,5 +43,7 @@ class MainApplication : Application(), ReactApplication {
     override fun onCreate() {
         super.onCreate()
         SoLoader.init(this, /* native exopackage */ false)
+
+        app_context = this
     }
 }

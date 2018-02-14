@@ -191,9 +191,7 @@ mapDispatchToProps = (dispatch, props) ->
     dispatch action.set_config_fps(text)
 
   o.on_start = ->
-    # for DEBUG
-    dispatch action.set_is_running(true)
-    # TODO
+    dispatch op.start_sm()
 
   o
 
