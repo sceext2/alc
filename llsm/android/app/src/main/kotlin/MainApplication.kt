@@ -1,6 +1,7 @@
 package org.sceext.llsm
 
 import android.app.Application
+import android.media.projection.MediaProjection
 
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactNativeHost
@@ -18,6 +19,11 @@ fun get_app_context(): MainApplication = app_context!!
 
 
 class MainApplication : Application(), ReactApplication {
+
+    var main_activity: MainActivity? = null
+
+    lateinit var media_projection: MediaProjection
+
 
     private val mReactNativeHost = object: ReactNativeHost(this) {
         override fun getUseDeveloperSupport(): Boolean {
@@ -45,5 +51,10 @@ class MainApplication : Application(), ReactApplication {
         SoLoader.init(this, /* native exopackage */ false)
 
         app_context = this
+    }
+
+    fun init_sm() {
+        // TODO
+        toast("DEBUG: init_sm TODO")
     }
 }

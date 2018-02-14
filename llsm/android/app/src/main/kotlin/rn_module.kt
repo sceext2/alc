@@ -1,6 +1,8 @@
 package org.sceext.llsm
 
 import android.content.Context
+import android.content.Intent
+import android.media.projection.MediaProjectionManager
 
 import com.facebook.react.bridge.NativeModule
 import com.facebook.react.bridge.ReactApplicationContext
@@ -34,9 +36,23 @@ class SmNative : ReactContextBaseJavaModule {
 
     @ReactMethod
     fun start_sm(config_json: String, promise: Promise) {
-        // only for DEBUG
-        toast("DEBUG: start_sm: got config_json: " + config_json)
-        // TODO
+        var c: Sconfig
+        // parse config
+        try {
+            val j = parse_json(config_json)
+            c = parse_config(j)
+        } catch (e: Exception) {
+            // DEBUG
+            e.printStackTrace()
+
+            toast("ERROR: bad config_json: " + config_json)
+            return
+        }
+
+        // SM step 1: Ask user by MediaProjectionManager
+        val m: MediaProjectionManager = get_app_context().getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+        val i = m.createScreenCaptureIntent()
+        get_app_context().main_activity!!.startActivityForResult(i, MEDIA_PROJECTION_REQUEST_CODE)
     }
 
     @ReactMethod
