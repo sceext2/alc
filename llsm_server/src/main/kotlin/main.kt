@@ -18,6 +18,8 @@ fun parse_json(text: String): JsonObject {
 
 class SocketThread(val s: Socket) : Runnable {
 
+    var running: Boolean = false
+
     fun _debug_str(): String {
         return "${s.inetAddress.toString()}:${s.port}"
     }
@@ -27,28 +29,28 @@ class SocketThread(val s: Socket) : Runnable {
         println("DEBUG: accept connection from ${_debug_str()}")
 
         try {
+            running = true
             recv_loop()
         } catch (e: Throwable) {
             e.printStackTrace()
         } finally {
             println("DEBUG: connection ${_debug_str()} closed")
+            running = false
         }
     }
 
     fun recv_loop() {
         s.setTcpNoDelay(true)
 
-        val i = s.inputStream
-        // recv buffer, size 1 MB
-        val b = ByteArray(1024 * 1024)
-        while (true) {
-            val r = i.read(b)
-            if (r == -1) {
-                println("DEBUG: ${_debug_str()}  ${r}")
-                break
+        // recv reader, use the simple data block protocol
+        val reader = BlockReader(s.inputStream)
+        while (running) {
+            val b = reader.read()
+            if (b == null) {
+                break  // EoS
             }
             // just print out number of bytes recved
-            println("DEBUG: ${_debug_str()}  got ${r} Bytes data")
+            println("DEBUG: ${_debug_str()}  got ${b.size} Bytes data")
         }
     }
 }
