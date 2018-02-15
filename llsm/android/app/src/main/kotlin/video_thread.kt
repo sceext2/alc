@@ -65,20 +65,20 @@ class VideoThread(val service: SmService) : Runnable {
         s = socket  // save socket
         // turn-off TCP delay
         s.setTcpNoDelay(true)
-
         // get OutputStream
         o = s.outputStream
+        try {
+            _init_sm()
+            // TODO send json data to TCP
+            o.write(_int_to_bytes(0))
+            o.flush()
 
-        _init_sm()
-        // TODO send json data to TCP
-        o.write(_int_to_bytes(0))
-        o.flush()
-
-        running = true
-        _sm_loop()
-        // TODO clean-up
-
-        s.close()  // close connection to server
+            running = true
+            _sm_loop()
+            // TODO clean-up
+        } finally {
+            s.close()  // close connection to server
+        }
     }
 
     fun _init_sm() {
@@ -88,21 +88,29 @@ class VideoThread(val service: SmService) : Runnable {
         // use h264 codec
         val format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC,
             sconfig.screen_size_x, sconfig.screen_size_y)
-        format.setInteger(MediaFormat.KEY_BITRATE_MODE,
-            MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR)  // Constant bitrate mode
+        // FIXME
+        //format.setInteger(MediaFormat.KEY_BITRATE_MODE,
+        //    MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR)  // Constant bitrate mode
         format.setInteger(MediaFormat.KEY_BIT_RATE, 20_000_000)  // 20 Mbps
-        format.setInteger(MediaFormat.KEY_CAPTURE_RATE, sconfig.fps)
+        //format.setInteger(MediaFormat.KEY_CAPTURE_RATE, sconfig.fps)
         format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
             MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
         format.setInteger(MediaFormat.KEY_FRAME_RATE, sconfig.fps)
         format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)  // 1s per I-frame
-        format.setInteger(MediaFormat.KEY_PRIORITY, 0)  // realtime
-        format.setInteger(MediaFormat.KEY_PROFILE,
-            MediaCodecInfo.CodecProfileLevel.AVCProfileBaseline)  // use baseline profile
+        //format.setInteger(MediaFormat.KEY_PRIORITY, 0)  // realtime
+        //format.setInteger(MediaFormat.KEY_PROFILE,
+        //    MediaCodecInfo.CodecProfileLevel.AVCProfileBaseline)  // use baseline profile
 
         // init MediaCodec
         codec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AVC)
-        codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
+        try {
+            codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
+        } catch (e: MediaCodec.CodecException) {
+            // DEBUG
+            System.err.println("ERROR: diagnosticInfo [${e.diagnosticInfo}], errorCode: ${e.errorCode}, isRecoverable: ${e.isRecoverable()}, isTransient: ${e.isTransient()}")
+
+            throw Exception("configure codec error", e)
+        }
 
         surface = codec.createInputSurface()
         codec.start()
