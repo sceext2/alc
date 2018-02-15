@@ -4,6 +4,7 @@ import java.net.Socket
 import java.net.ServerSocket
 import java.net.InetAddress
 import java.io.InputStream
+import java.io.FileOutputStream
 
 import com.beust.klaxon.Parser
 import com.beust.klaxon.JsonObject
@@ -44,6 +45,11 @@ class SocketThread(val s: Socket) : Runnable {
 
         // recv reader, use the simple data block protocol
         val reader = BlockReader(s.inputStream)
+        // save data in file
+        val filename = ".${_debug_str()}-${System.nanoTime()}.h264"
+        val f = FileOutputStream(filename)
+        println("DEBUG: write to ${filename}")
+
         while (running) {
             val b = reader.read()
             if (b == null) {
@@ -51,7 +57,11 @@ class SocketThread(val s: Socket) : Runnable {
             }
             // just print out number of bytes recved
             println("DEBUG: ${_debug_str()}  got ${b.size} Bytes data")
+            // save data in file
+            f.write(b)
         }
+        // close file
+        f.close()
     }
 }
 
