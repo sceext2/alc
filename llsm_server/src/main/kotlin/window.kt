@@ -9,7 +9,6 @@ import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.paint.Color
 
-import org.bytedeco.javacpp.avutil.AVFrame
 
 var main_window_size_x: Int = 1280
 var main_window_size_y: Int = 720
@@ -23,8 +22,6 @@ class VideoWindow() : Application() {
 
     var sx: Int = 0
     var sy: Int = 0
-
-    var _blink: Boolean = true
 
     override fun start(stage: Stage) {
         main_window = this
@@ -47,23 +44,15 @@ class VideoWindow() : Application() {
         gc.fillRect(0.0, 0.0, sx.toDouble(), sy.toDouble())
     }
 
-    fun _do_update_frame() {
+    fun _do_update_frame(size_x: Int, size_y: Int, data: ByteArray) {
         // TODO
-        if (_blink) {
-            gc.setFill(Color.WHITE)
-        } else {
-            gc.setFill(Color.BLACK)
-        }
-        _blink = ! _blink
-
-        gc.fillRect(0.0, 0.0, sx.toDouble(), sy.toDouble())
     }
 
-    fun update_frame(frame: AVFrame) {
+    fun update_frame(size_x: Int, size_y: Int, data: ByteArray) {
         // TODO
         Platform.runLater(object: Runnable {
             override fun run() {
-                _do_update_frame()
+                _do_update_frame(size_x, size_y, data)
             }
         })
     }

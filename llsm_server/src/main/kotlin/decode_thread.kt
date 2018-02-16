@@ -1,7 +1,5 @@
 package org.sceext.llsm_server
 
-import org.bytedeco.javacpp.avutil.AVFrame
-
 
 class Decoder(val port: Int, val socket_thread: SocketThread) : Runnable {
     var codec: Codec? = null
@@ -12,9 +10,9 @@ class Decoder(val port: Int, val socket_thread: SocketThread) : Runnable {
         try {
             println("DEBUG: create codec on ${url}")
             codec = Codec(url, object: CodecCallback {
-                override fun on_one_frame(frame: AVFrame) {
+                override fun on_one_frame(size_x: Int, size_y: Int, data: ByteArray) {
                     if (main_window != null) {
-                        main_window!!.update_frame(frame)
+                        main_window!!.update_frame(size_x, size_y, data)
                     }
                 }
             })
