@@ -88,16 +88,16 @@ class VideoThread(val service: SmService) : Runnable {
         // use h264 codec
         val format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC,
             sconfig.screen_size_x, sconfig.screen_size_y)
-        // FIXME
-        //format.setInteger(MediaFormat.KEY_BITRATE_MODE,
-        //    MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR)  // Constant bitrate mode
+        format.setInteger(MediaFormat.KEY_BITRATE_MODE,
+            MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR)  // Constant bitrate mode
         format.setInteger(MediaFormat.KEY_BIT_RATE, 20_000_000)  // 20 Mbps
-        //format.setInteger(MediaFormat.KEY_CAPTURE_RATE, sconfig.fps)
+        format.setInteger(MediaFormat.KEY_CAPTURE_RATE, sconfig.fps)
         format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
             MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
         format.setInteger(MediaFormat.KEY_FRAME_RATE, sconfig.fps)
         format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)  // 1s per I-frame
-        //format.setInteger(MediaFormat.KEY_PRIORITY, 0)  // realtime
+        format.setInteger(MediaFormat.KEY_PRIORITY, 0)  // realtime
+        // FIXME not support profile
         //format.setInteger(MediaFormat.KEY_PROFILE,
         //    MediaCodecInfo.CodecProfileLevel.AVCProfileBaseline)  // use baseline profile
 
