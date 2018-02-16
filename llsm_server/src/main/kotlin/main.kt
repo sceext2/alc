@@ -80,7 +80,7 @@ class SocketThread(val s: Socket) : Runnable {
         // TODO improve this
 
         // start window thread
-        Thread(VideoThread(screen_size_x, screen_size_y)).start()
+        Thread(VideoThread(screen_size_x, screen_size_y, _debug_str())).start()
 
         val o = _decode_client.outputStream
         while (running) {
