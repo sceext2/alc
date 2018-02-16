@@ -134,12 +134,14 @@ class Codec(val url: String, val callback: CodecCallback) {
         // TODO
         println("DEBUG: Codec: got frame ${frame_count}")
 
+        val width = p_codec_ctx.width()
+        val height = p_codec_ctx.height()
         // get bytes from p_frame_rgb
         val data = p_frame_rgb.data(0)
-        val b = ByteArray(buffer_size)
+        var b = ByteArray(buffer_size)
         data.position(0).get(b)
 
-        callback.on_one_frame(p_codec_ctx.width(), p_codec_ctx.height(), b)
+        callback.on_one_frame(width, height, b)
     }
 
     fun free() {

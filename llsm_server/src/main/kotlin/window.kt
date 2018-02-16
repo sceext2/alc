@@ -8,6 +8,9 @@ import javafx.scene.Group
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.paint.Color
+import javafx.scene.image.WritableImage
+import javafx.scene.image.PixelWriter
+import javafx.scene.image.PixelFormat
 
 
 var main_window_size_x: Int = 1280
@@ -19,6 +22,8 @@ var main_window: VideoWindow? = null
 class VideoWindow() : Application() {
     lateinit var canvas: Canvas
     lateinit var gc: GraphicsContext
+    lateinit var image: WritableImage
+    lateinit var writer: PixelWriter
 
     var sx: Int = 0
     var sy: Int = 0
@@ -27,6 +32,9 @@ class VideoWindow() : Application() {
         main_window = this
         sx = main_window_size_x
         sy = main_window_size_y
+        // init image
+        image = WritableImage(sx, sy)
+        writer = image.pixelWriter
 
         stage.setTitle(main_window_title)
 
@@ -45,7 +53,10 @@ class VideoWindow() : Application() {
     }
 
     fun _do_update_frame(size_x: Int, size_y: Int, data: ByteArray) {
-        // TODO
+        // load pixel data in image
+        writer.setPixels(0, 0, size_x, size_y, PixelFormat.getByteRgbInstance(), data, 0, size_x * 3)
+
+        gc.drawImage(image, 0.0, 0.0)
     }
 
     fun update_frame(size_x: Int, size_y: Int, data: ByteArray) {
