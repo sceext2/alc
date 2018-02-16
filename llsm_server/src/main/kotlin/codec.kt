@@ -38,8 +38,12 @@ fun codec_init() {
 }
 
 
+interface CodecCallback {
+    fun on_one_frame(frame: AVFrame)
+}
+
 // codec with ffmpeg
-class Codec(val url: String) {
+class Codec(val url: String, val callback: CodecCallback) {
     var video_stream = 0  // use first stream
 
     var p_format_ctx: AVFormatContext
@@ -100,6 +104,8 @@ class Codec(val url: String) {
         frame_count += 1
         // TODO
         println("DEBUG: Codec: got frame ${frame_count}")
+
+        callback.on_one_frame(p_frame)
     }
 
     fun free() {

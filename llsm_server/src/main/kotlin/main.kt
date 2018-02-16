@@ -51,7 +51,7 @@ class SocketThread(val s: Socket) : Runnable {
         val port = _decode_server.getLocalPort()
         println("DEBUG: decode server at 127.0.0.1:${port}")
 
-        decoder = Decoder(port)
+        decoder = Decoder(port, this)
         _decode_thread = Thread(decoder)
         _decode_thread.start()
         println("DEBUG: start decode thread")
@@ -75,7 +75,12 @@ class SocketThread(val s: Socket) : Runnable {
         }
         println("DEBUG: ${_debug_str()} config: ${String(b)}")
         val config = parse_json(String(b))
-        // FIXME
+        val screen_size_x = config.int("screen_size_x")!!
+        val screen_size_y = config.int("screen_size_y")!!
+        // TODO improve this
+
+        // start window thread
+        Thread(VideoThread(screen_size_x, screen_size_y)).start()
 
         val o = _decode_client.outputStream
         while (running) {

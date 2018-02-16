@@ -1,7 +1,9 @@
 package org.sceext.llsm_server
 
+import org.bytedeco.javacpp.avutil.AVFrame
 
-class Decoder(val port: Int) : Runnable {
+
+class Decoder(val port: Int, val socket_thread: SocketThread) : Runnable {
     var codec: Codec? = null
 
     override fun run() {
@@ -9,7 +11,13 @@ class Decoder(val port: Int) : Runnable {
         val url = "tcp://127.0.0.1:${port}?tcp_nodelay=1&recv_buffer_size=4096"
         try {
             println("DEBUG: create codec on ${url}")
-            codec = Codec(url)
+            codec = Codec(url, object: CodecCallback {
+                override fun on_one_frame(frame: AVFrame) {
+                    if (main_window != null) {
+                        main_window!!.update_frame(frame)
+                    }
+                }
+            })
             while (codec!!.one()) {
             }
         } finally {
