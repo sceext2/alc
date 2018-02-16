@@ -19,7 +19,10 @@ fun parse_json(text: String): JsonObject {
 class SocketThread(val s: Socket) : Runnable {
 
     var running: Boolean = false
-    var codec: Codec? = null
+    lateinit var decoder: Decoder
+    lateinit var _decode_server: ServerSocket
+    lateinit var _decode_client: Socket
+    lateinit var _decode_thread: Thread
 
     fun _debug_str(): String {
         return "${s.inetAddress.toString()}:${s.port}"
@@ -31,15 +34,33 @@ class SocketThread(val s: Socket) : Runnable {
 
         try {
             running = true
+
+            _start_decode_thread()
             recv_loop()
         } catch (e: Throwable) {
             e.printStackTrace()
         } finally {
             println("DEBUG: connection ${_debug_str()} closed")
             running = false
-            // free codec
-            codec?.free()
         }
+    }
+
+    fun _start_decode_thread() {
+        val addr = InetAddress.getByName("127.0.0.1")
+        _decode_server = ServerSocket(0, 1, addr)
+        val port = _decode_server.getLocalPort()
+        println("DEBUG: decode server at 127.0.0.1:${port}")
+
+        decoder = Decoder(port)
+        _decode_thread = Thread(decoder)
+        _decode_thread.start()
+        println("DEBUG: start decode thread")
+
+        // FIXME TODO improve this
+        // accept only one connection (the first connection)
+        _decode_client = _decode_server.accept()
+        _decode_client.setTcpNoDelay(true)
+        println("DEBUG: decode client at ${_decode_client.inetAddress.toString()}:${_decode_client.port}")
     }
 
     fun recv_loop() {
@@ -53,23 +74,10 @@ class SocketThread(val s: Socket) : Runnable {
             return
         }
         println("DEBUG: ${_debug_str()} config: ${String(b)}")
-        // create codec
         val config = parse_json(String(b))
-        val screen_size_x = config.int("screen_size_x")!!
-        val screen_size_y = config.int("screen_size_y")!!
-        println("DEBUG: create codec with size ${screen_size_x} x ${screen_size_y}")
-        codec = Codec(screen_size_x, screen_size_y)
+        // FIXME
 
-        // FIXME try to feed first 2 block to codec
-        val bx = reader.read()
-        val by = reader.read()
-        if ((bx == null) or (by == null)) {
-            return
-        }
-        val bb = bx!! + by!!
-        println("DEBUG: feed bb (${bb.size}) = bx (${bx.size}) + by (${by.size})")
-        codec!!.feed(bb)
-
+        val o = _decode_client.outputStream
         while (running) {
             val b = reader.read()
             if (b == null) {
@@ -77,8 +85,10 @@ class SocketThread(val s: Socket) : Runnable {
             }
             // print out number of bytes recved
             println("DEBUG: ${_debug_str()}  got ${b.size} Bytes data")
-            // feed data to codec
-            codec!!.feed(b)
+
+            // FIXME
+            o.write(b)
+            o.flush()
         }
     }
 }
