@@ -19,6 +19,7 @@ fun parse_json(text: String): JsonObject {
 class SocketThread(val s: Socket) : Runnable {
 
     var running: Boolean = false
+    var codec: Codec? = null
 
     fun _debug_str(): String {
         return "${s.inetAddress.toString()}:${s.port}"
@@ -36,6 +37,8 @@ class SocketThread(val s: Socket) : Runnable {
         } finally {
             println("DEBUG: connection ${_debug_str()} closed")
             running = false
+            // free codec
+            codec?.free()
         }
     }
 
@@ -50,14 +53,32 @@ class SocketThread(val s: Socket) : Runnable {
             return
         }
         println("DEBUG: ${_debug_str()} config: ${String(b)}")
+        // create codec
+        val config = parse_json(String(b))
+        val screen_size_x = config.int("screen_size_x")!!
+        val screen_size_y = config.int("screen_size_y")!!
+        println("DEBUG: create codec with size ${screen_size_x} x ${screen_size_y}")
+        codec = Codec(screen_size_x, screen_size_y)
+
+        // FIXME try to feed first 2 block to codec
+        val bx = reader.read()
+        val by = reader.read()
+        if ((bx == null) or (by == null)) {
+            return
+        }
+        val bb = bx!! + by!!
+        println("DEBUG: feed bb (${bb.size}) = bx (${bx.size}) + by (${by.size})")
+        codec!!.feed(bb)
 
         while (running) {
             val b = reader.read()
             if (b == null) {
                 break  // EoS
             }
-            // just print out number of bytes recved
+            // print out number of bytes recved
             println("DEBUG: ${_debug_str()}  got ${b.size} Bytes data")
+            // feed data to codec
+            codec!!.feed(b)
         }
     }
 }
