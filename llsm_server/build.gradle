@@ -25,6 +25,7 @@ repositories {
 dependencies {
   compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
   compile "com.beust:klaxon:2.1.5"
+  compile "org.bytedeco.javacpp-presets:ffmpeg-platform:3.4.1-1.4"
 
   testCompile "org.jetbrains.kotlin:kotlin-test"
   testCompile "org.jetbrains.kotlin:kotlin-test-junit"

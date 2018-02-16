@@ -4,7 +4,6 @@ import java.net.Socket
 import java.net.ServerSocket
 import java.net.InetAddress
 import java.io.InputStream
-import java.io.FileOutputStream
 
 import com.beust.klaxon.Parser
 import com.beust.klaxon.JsonObject
@@ -52,11 +51,6 @@ class SocketThread(val s: Socket) : Runnable {
         }
         println("DEBUG: ${_debug_str()} config: ${String(b)}")
 
-        // save data in file
-        val filename = ".${_debug_str()}-${System.nanoTime()}.h264"
-        val f = FileOutputStream(filename)
-        println("DEBUG: write to ${filename}")
-
         while (running) {
             val b = reader.read()
             if (b == null) {
@@ -64,11 +58,7 @@ class SocketThread(val s: Socket) : Runnable {
             }
             // just print out number of bytes recved
             println("DEBUG: ${_debug_str()}  got ${b.size} Bytes data")
-            // save data in file
-            f.write(b)
         }
-        // close file
-        f.close()
     }
 }
 
@@ -77,6 +67,9 @@ class SocketThread(val s: Socket) : Runnable {
 fun main(args: Array<String>) {
     val ip = args[0].trim()
     val port = args[1].toInt()
+
+    // init ffmpeg
+    codec_init()
 
     // listen: init server
     val addr = InetAddress.getByName(ip)
