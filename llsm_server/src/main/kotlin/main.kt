@@ -45,6 +45,13 @@ class SocketThread(val s: Socket) : Runnable {
 
         // recv reader, use the simple data block protocol
         val reader = BlockReader(s.inputStream)
+        // first block is config data, print out for DEBUG
+        val b = reader.read()
+        if (b == null) {
+            return
+        }
+        println("DEBUG: ${_debug_str()} config: ${String(b)}")
+
         // save data in file
         val filename = ".${_debug_str()}-${System.nanoTime()}.h264"
         val f = FileOutputStream(filename)

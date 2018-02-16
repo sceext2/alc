@@ -14,9 +14,16 @@ import android.view.Surface
 import android.hardware.display.VirtualDisplay
 import android.hardware.display.DisplayManager
 
+import com.beust.klaxon.json
+import com.beust.klaxon.JsonObject
+
 
 const val VIRTUAL_DISPLAY_NAME: String = "llsm-display"
 const val VIRTUAL_DISPLAY_DPI: Int = 96
+
+const val VIDEO_BIT_RATE: Int = 20_000_000  // 20 Mbps
+const val VIDEO_CODEC: String = MediaFormat.MIMETYPE_VIDEO_AVC  // use h264
+
 
 class VideoThread(val service: SmService) : Runnable {
 
@@ -69,8 +76,10 @@ class VideoThread(val service: SmService) : Runnable {
         o = s.outputStream
         try {
             _init_sm()
-            // TODO send json data to TCP
-            o.write(_int_to_bytes(0))
+            // send json config data to TCP
+            val data = _gen_config().toJsonString().toByteArray()
+            o.write(_int_to_bytes(data.size))
+            o.write(data)
             o.flush()
 
             running = true
@@ -81,16 +90,26 @@ class VideoThread(val service: SmService) : Runnable {
         }
     }
 
+    fun _gen_config(): JsonObject {
+        val sconfig = get_app_context().sconfig
+        return json {
+            obj("screen_size_x" to sconfig.screen_size_x,
+                "screen_size_y" to sconfig.screen_size_y,
+                "fps" to sconfig.fps,
+                "bitrate_bps" to VIDEO_BIT_RATE,
+                "codec" to VIDEO_CODEC)
+        }
+    }
+
     fun _init_sm() {
         val sconfig = get_app_context().sconfig
         val mp = get_app_context().media_projection
 
-        // use h264 codec
-        val format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC,
+        val format = MediaFormat.createVideoFormat(VIDEO_CODEC,
             sconfig.screen_size_x, sconfig.screen_size_y)
         format.setInteger(MediaFormat.KEY_BITRATE_MODE,
             MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR)  // Constant bitrate mode
-        format.setInteger(MediaFormat.KEY_BIT_RATE, 20_000_000)  // 20 Mbps
+        format.setInteger(MediaFormat.KEY_BIT_RATE, VIDEO_BIT_RATE)
         format.setInteger(MediaFormat.KEY_CAPTURE_RATE, sconfig.fps)
         format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
             MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
@@ -102,7 +121,7 @@ class VideoThread(val service: SmService) : Runnable {
         //    MediaCodecInfo.CodecProfileLevel.AVCProfileBaseline)  // use baseline profile
 
         // init MediaCodec
-        codec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AVC)
+        codec = MediaCodec.createEncoderByType(VIDEO_CODEC)
         try {
             codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
         } catch (e: MediaCodec.CodecException) {
