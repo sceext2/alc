@@ -40,7 +40,7 @@ Achieve low latency by not compress video data.
 
   | Size  | FPS | Color | latency | frame size | bandwidth                   |
   | ----: | --: | :---- | ------: | ---------: | --------------------------: |
-  |       |     |       | 0.06 ms |            | 40.6 Gpbs (local network) *(1)* |
+  |       |     |       | 0.06 ms |            | 40.6 Gbps (local network) *(1)* |
   |    4K |  60 | RGB24 | 16.7 ms |   23.74 MB | 11.95 Gbps (11,943,936,000) |
   |       |     |       |         |            |      10 Gbps (10G Ethernet) |
   |    4K |  50 | RGB24 | 20.0 ms |   23.74 MB |  9.954 Gbps (9,953,280,000) |
@@ -104,7 +104,8 @@ Achieve low latency by not compress video data.
 (1) local network: 127.0.0.1/TCP, iperf3. CPU: i5-6200U, memory: DDR3-1600.
     Linux 4.15.3
 
-(2) android usb network: Android 6.0, iperf3/TCP, USB 2.0
+(2) android usb network: Android 6.0, iperf3/TCP, USB 2.0 (Redmi Note 4X nikel)
+    (usb tethering)
 
 (3) android usb adb: Android 6.0, `adb reverse`, iperf3/TCP, USB 2.0
 
