@@ -114,7 +114,9 @@ class VideoThread(val service: SmService) : Runnable {
         format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
             MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
         format.setInteger(MediaFormat.KEY_FRAME_RATE, sconfig.fps)
-        format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)  // 1s per I-frame
+        // FIXME
+        //format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)  // 1s per I-frame
+        format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 0)  // all I-frames
         format.setInteger(MediaFormat.KEY_PRIORITY, 0)  // realtime
         // FIXME not support profile
         //format.setInteger(MediaFormat.KEY_PROFILE,
