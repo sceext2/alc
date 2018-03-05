@@ -5,12 +5,13 @@ import javafx.application.Platform
 import javafx.stage.Stage
 import javafx.scene.Scene
 import javafx.scene.Group
-import javafx.scene.canvas.Canvas
-import javafx.scene.canvas.GraphicsContext
 import javafx.scene.paint.Color
 import javafx.scene.image.WritableImage
 import javafx.scene.image.PixelWriter
 import javafx.scene.image.PixelFormat
+import javafx.scene.image.ImageView
+import javafx.beans.value.ObservableValue
+import javafx.beans.value.ChangeListener
 
 
 var main_window_size_x: Int = 1280
@@ -20,10 +21,9 @@ var main_window: VideoWindow? = null
 
 
 class VideoWindow() : Application() {
-    lateinit var canvas: Canvas
-    lateinit var gc: GraphicsContext
     lateinit var image: WritableImage
     lateinit var writer: PixelWriter
+    lateinit var iv: ImageView
 
     var sx: Int = 0
     var sy: Int = 0
@@ -38,25 +38,41 @@ class VideoWindow() : Application() {
 
         stage.setTitle(main_window_title)
 
+        iv = ImageView(image)
+        iv.setFitWidth(sx.toDouble())
+        iv.setFitHeight(sy.toDouble())
+        iv.setPreserveRatio(true)
+        iv.setSmooth(true)
+        iv.setCache(true)
+
         val root = Group()
-        canvas = Canvas(sx.toDouble(), sy.toDouble())
-        gc = canvas.getGraphicsContext2D()
-        root.getChildren().add(canvas)
+        root.getChildren().add(iv)
 
         val scene = Scene(root, sx.toDouble(), sy.toDouble())
+        scene.setFill(Color.BLACK)
+        val window_size_listener = object: ChangeListener<Number> {
+            override fun changed(observable: ObservableValue<out Number>, old_value: Number, new_value: Number) {
+                val size_x = scene.getWidth()
+                val size_y = scene.getHeight()
+                _on_window_resize(size_x, size_y)
+            }
+        }
+        scene.widthProperty().addListener(window_size_listener)
+        scene.heightProperty().addListener(window_size_listener)
+
         stage.setScene(scene)
         stage.show()
+    }
 
-        // init draw canvas
-        gc.setFill(Color.BLACK)
-        gc.fillRect(0.0, 0.0, sx.toDouble(), sy.toDouble())
+    fun _on_window_resize(size_x: Double, size_y: Double) {
+        iv.setFitWidth(size_x)
+        iv.setFitHeight(size_y)
     }
 
     fun _do_update_frame(size_x: Int, size_y: Int, data: ByteArray) {
         // load pixel data in image
         writer.setPixels(0, 0, size_x, size_y, PixelFormat.getByteRgbInstance(), data, 0, size_x * 3)
-
-        gc.drawImage(image, 0.0, 0.0)
+        // TODO
     }
 
     fun update_frame(size_x: Int, size_y: Int, data: ByteArray) {
